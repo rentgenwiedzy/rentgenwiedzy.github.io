@@ -279,7 +279,7 @@ select{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/
     <div class="stat"><div class="stat-n" id="stDone">0</div><div class="stat-l">Sprawdzone</div></div>
   </div>
 
-  <button class="mb" onclick="requireAdmin(()=>showScreen('add'))">
+  <button class="mb" onclick="goAdd()">
     <div class="mb-ico" style="background:#e0f7fa">
       <svg viewBox="0 0 24 24" fill="none" stroke="#0a7ea4" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
         <circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/>
@@ -480,7 +480,7 @@ select{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/
     <svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
     <span>Menu</span>
   </button>
-  <button class="nb" id="nb-add" onclick="requireAdmin(()=>showScreen('add'))">
+  <button class="nb" id="nb-add" onclick="goAdd()">
     <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></svg>
     <span>Dodaj</span>
   </button>
@@ -506,6 +506,8 @@ const ADMIN_KEY = 'rw_admin';
 
 const isAdmin = () => sessionStorage.getItem(ADMIN_KEY) === '1';
 
+function goAdd() { requireAdmin(function(){ showScreen('add'); }); }
+
 function refreshBadge() {
   document.getElementById('admBadge').classList.toggle('on', isAdmin());
 }
@@ -516,7 +518,7 @@ function requireAdmin(cb) {
   document.getElementById('admPass').value = '';
   document.getElementById('admErr').textContent = '';
   document.getElementById('admModal').classList.remove('hidden');
-  setTimeout(() => document.getElementById('admPass').focus(), 120);
+  setTimeout(function(){ document.getElementById('admPass').focus(); }, 120);
 }
 
 function tryLogin() {
@@ -551,8 +553,8 @@ function adminLogout() {
 // ════════════════════════════════════
 const TRIVIA = [
   {t:"Wilhelm Conrad Röntgen odkrył promieniowanie X 8 listopada 1895 r. podczas eksperymentów z rurką Crookesa. W 1901 r. otrzymał pierwszą w historii Nagrodę Nobla z fizyki.",d:"8 XI 1895"},
-  {t:"Pierwsze zdjęcie rentgenowskie przedstawiało dłoń żony Röntgena, Anny Berthy. Widok własnego szkieletu tak ją przeraził, że powiedziała: „Widziałam własną śmierć!"",d:"22 XII 1895"},
-  {t:"Maria Skłodowska-Curie podczas I wojny światowej skonstruowała mobilne jednostki rentgenowskie zwane „małymi Curie". Obsłużyły one ponad milion rannych żołnierzy.",d:"1914–1918"},
+  {t:"Pierwsze zdjęcie rentgenowskie przedstawiało dłoń żony Röntgena, Anny Berthy. Widok własnego szkieletu tak ją przeraził, że powiedziała: 'Widziałam własną śmierć!"",d:"22 XII 1895"},
+  {t:"Maria Skłodowska-Curie podczas I wojny światowej skonstruowała mobilne jednostki rentgenowskie zwane 'małymi Curie". Obsłużyły one ponad milion rannych żołnierzy.",d:"1914–1918"},
   {t:"Tomografia komputerowa (CT) została wynaleziona przez Godfreya Hounsfielda i Allana Cormacka, którzy niezależnie od siebie podzielili Nagrodę Nobla z medycyny w 1979 r.",d:"Nobel 1979"},
   {t:"Pierwsze kliniczne badanie MRI u człowieka przeprowadzono 3 lipca 1977 r. – trwało prawie 5 godzin. Dziś standardowe badanie MRI trwa kilkanaście do kilkudziesięciu minut.",d:"3 VII 1977"},
   {t:"Jednostka dawki pochłoniętej promieniowania nosi nazwę Grej (Gy), na cześć brytyjskiego fizyka Louisa Harolda Greya, pioniera radiobiologii i planowania napromieniania.",d:"od 1975 r."},
@@ -578,7 +580,7 @@ const TRIVIA = [
   {t:"FOV (pole widzenia), TR (czas repetycji) i TE (czas echa) to kluczowe parametry sekwencji MRI wpływające na kontrast tkankowy i rozdzielczość przestrzenną obrazu.",d:"fakt techniczny"},
   {t:"Technologia flat-panel detektorów (FPD) na amorficznym selenie lub krzemie rewolucjonizuje radiografię cyfrową od 2000 r. – wysoka rozdzielczość i krótki czas ekspozycji.",d:"od 2000 r."},
   {t:"Mammografia jako badanie przesiewowe NFZ wdrożona w Polsce w 2006 r. w ramach Programu Wczesnego Wykrywania Raka Piersi. Skierowana do kobiet w wieku 50–69 lat.",d:"Polska 2006"},
-  {t:"Elektroradiologia w Polsce jest zawodem medycznym regulowanym rozporządzeniem Ministra Zdrowia. Tytuł „technik elektroradiolog" objęty jest ochroną prawną.",d:"prawo PL"},
+  {t:"Elektroradiologia w Polsce jest zawodem medycznym regulowanym rozporządzeniem Ministra Zdrowia. Tytuł 'technik elektroradiolog" objęty jest ochroną prawną.",d:"prawo PL"},
   {t:"Kierunek elektroradiologia w Polsce prowadzony jest na studiach licencjackich (3 lata). Program obejmuje anatomię, fizykę medyczną, techniki obrazowania i ochronę radiologiczną.",d:"edukacja PL"},
   {t:"Kontrast siarczanu baru stosowany w radiologii przewodu pokarmowego jest nieresorbowalny – nie wchłania się do krwiobiegu. Jest bezpieczny jedynie przy braku perforacji jelita.",d:"fakt kliniczny"},
 ];
@@ -651,11 +653,11 @@ const SUBS = {home:'Elektroradiologia',add:'Dodaj fiszkę',sets:'Zestawy fiszek'
               setup:'Wybierz sprawdzian',quiz:'Sprawdzian w toku',summary:'Podsumowanie'};
 
 function showScreen(name) {
-  if (name==='add' && !isAdmin()) { requireAdmin(()=>showScreen('add')); return; }
-  document.querySelectorAll('.sc').forEach(s=>s.classList.remove('active'));
+  if (name==='add' && !isAdmin()) { requireAdmin(function(){ showScreen('add'); }); return; }
+  document.querySelectorAll('.sc').forEach(function(s){ s.classList.remove('active'); });
   document.getElementById('sc-'+name).classList.add('active');
-  document.querySelectorAll('.nb').forEach(b=>b.classList.remove('active'));
-  const nb=document.getElementById('nb-'+name);
+  document.querySelectorAll('.nb').forEach(function(b){ b.classList.remove('active'); });
+  var nb=document.getElementById('nb-'+name);
   if(nb) nb.classList.add('active');
   document.getElementById('hSub').textContent = SUBS[name]||'';
   document.getElementById('backBtn').style.display = NAV.includes(name)?'none':'block';

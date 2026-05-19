@@ -1,35 +1,1338 @@
-Świetnie! Wstawiam Twoją konfigurację i finalizuję plik.
+<!DOCTYPE html>
+<html lang="pl" data-theme="light">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="theme-color" content="#0a2540">
+<title>Rentgen Wiedzy</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,600;0,700;1,600&family=Source+Serif+4:ital,wght@0,300;0,400;0,600;1,300;1,400&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+/* ══ THEME TOKENS ══ */
+[data-theme=light]{
+  --bg:#f0f4f8;--bg2:#e4edf5;--surface:#fff;--surface2:#f7fafd;
+  --navy:#0a2540;--teal:#0a7ea4;--teal-l:#38b2d8;--teal-dim:rgba(10,126,164,.12);
+  --border:#c8dce8;--text:#0a2540;--muted:#5a7a8a;--muted2:#8aa4b4;
+  --red:#c0392b;--green:#00796b;--warn:#e67e22;
+  --shadow:0 4px 20px rgba(10,40,80,.09);--shadow2:0 8px 32px rgba(10,40,80,.13);
+  --hd-bg:#0a2540;--hd-text:#fff;
+}
+[data-theme=dark]{
+  --bg:#0d1b2a;--bg2:#112236;--surface:#162840;--surface2:#1a304d;
+  --navy:#c8e4f4;--teal:#38b2d8;--teal-l:#7dd3f0;--teal-dim:rgba(56,178,216,.15);
+  --border:#1e3a56;--text:#d8eaf6;--muted:#6a9ab8;--muted2:#4a7a9a;
+  --red:#e74c3c;--green:#26a69a;--warn:#f39c12;
+  --shadow:0 4px 20px rgba(0,0,0,.3);--shadow2:0 8px 32px rgba(0,0,0,.4);
+  --hd-bg:#071420;--hd-text:#c8e4f4;
+}
 
-Gotowe! Wszystko sprawdzone. Teraz jeden ważny krok po Twojej stronie:
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+html,body{height:100%}
+body{
+  font-family:'DM Sans',sans-serif;
+  background:var(--bg);
+  color:var(--text);
+  overflow-x:hidden;
+  transition:background .3s,color .3s;
+}
 
----
+/* ══ HEADER ══ */
+.hd{
+  background:var(--hd-bg);
+  padding:12px 16px 10px;
+  display:flex;align-items:center;gap:10px;
+  position:sticky;top:0;z-index:200;
+  box-shadow:0 2px 20px rgba(0,0,0,.25);
+}
+.hd-logo{
+  text-decoration:none;display:flex;flex-direction:column;flex:1;min-width:0;
+}
+.hd-title{
+  font-family:'Playfair Display',serif;
+  color:var(--hd-text);
+  font-size:22px;font-weight:700;letter-spacing:-.2px;
+  line-height:1.1;white-space:nowrap;
+}
+.hd-sub{color:var(--teal-l);font-size:10px;font-weight:300;letter-spacing:.6px;margin-top:1px}
 
-**⚠️ Musisz otworzyć reguły Firestore na zapis**
+.back-btn{background:none;border:none;color:var(--teal-l);font-size:20px;cursor:pointer;padding:4px 8px;display:none;flex-shrink:0}
 
-W Firebase Console wejdź w **Firestore Database → Reguły** i wklej to:
+/* Hamburger menu */
+.hd-menu-btn{
+  background:none;border:none;cursor:pointer;padding:6px;
+  display:flex;flex-direction:column;gap:5px;flex-shrink:0;
+}
+.hd-menu-btn span{
+  display:block;width:22px;height:2px;
+  background:var(--teal-l);border-radius:2px;
+  transition:all .3s;
+}
 
-```
-rules_version = '2';
-service cloud.firestore {
-  match /databases/{database}/documents {
-    match /{document=**} {
-      allow read: if true;
-      allow write: if true;
-    }
+/* Dropdown */
+.dropdown{
+  position:fixed;top:0;right:0;bottom:0;left:0;
+  z-index:300;pointer-events:none;
+}
+.dropdown.open{pointer-events:all}
+.dropdown-overlay{
+  position:absolute;inset:0;
+  background:rgba(0,0,0,.4);
+  opacity:0;transition:opacity .25s;
+}
+.dropdown.open .dropdown-overlay{opacity:1}
+.dropdown-panel{
+  position:absolute;top:0;right:-280px;bottom:0;width:270px;
+  background:var(--surface);
+  box-shadow:-4px 0 30px rgba(0,0,0,.2);
+  transition:right .28s cubic-bezier(.4,0,.2,1);
+  display:flex;flex-direction:column;
+  overflow:hidden;
+}
+.dropdown.open .dropdown-panel{right:0}
+.dp-header{
+  background:var(--hd-bg);padding:20px 18px 16px;
+  font-family:'Playfair Display',serif;
+  color:#fff;font-size:16px;
+  display:flex;align-items:center;justify-content:space-between;
+}
+.dp-close{background:none;border:none;color:var(--teal-l);font-size:22px;cursor:pointer;line-height:1}
+.dp-section{padding:12px 0 4px 16px;font-size:10px;font-weight:600;color:var(--muted2);text-transform:uppercase;letter-spacing:1px}
+.dp-item{
+  display:flex;align-items:center;gap:12px;
+  padding:13px 18px;cursor:pointer;
+  border:none;background:none;width:100%;text-align:left;
+  font-family:'DM Sans',sans-serif;font-size:14px;font-weight:500;
+  color:var(--text);transition:background .15s;
+}
+.dp-item:active,.dp-item:hover{background:var(--teal-dim)}
+.dp-item svg{width:18px;height:18px;stroke:var(--teal);fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;flex-shrink:0}
+.dp-divider{height:1px;background:var(--border);margin:8px 16px}
+.dp-theme{
+  display:flex;align-items:center;gap:12px;
+  padding:13px 18px;cursor:pointer;
+  border:none;background:none;width:100%;
+  font-family:'DM Sans',sans-serif;font-size:14px;font-weight:500;color:var(--text);
+}
+.dp-theme svg{width:18px;height:18px;stroke:var(--teal);fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.dp-footer{margin-top:auto;padding:16px 18px;font-size:11px;color:var(--muted2);border-top:1px solid var(--border)}
+
+/* ══ SCREENS ══ */
+.sc{display:none;padding:16px 14px 90px;animation:fi .28s ease;min-height:calc(100vh - 56px)}
+.sc.active{display:block}
+@keyframes fi{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+
+/* ══ BOTTOM NAV ══ */
+.nav{
+  position:fixed;bottom:0;left:0;right:0;
+  background:var(--hd-bg);display:flex;z-index:100;
+  box-shadow:0 -2px 16px rgba(0,0,0,.2);
+}
+.nb{
+  flex:1;background:none;border:none;color:#5a7a9a;
+  padding:9px 0 12px;font-size:9px;
+  font-family:'DM Sans',sans-serif;cursor:pointer;
+  display:flex;flex-direction:column;align-items:center;gap:3px;transition:color .2s;
+}
+.nb svg{width:20px;height:20px;stroke:#5a7a9a;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;transition:stroke .2s}
+.nb.active{color:var(--teal-l)}
+.nb.active svg{stroke:var(--teal-l)}
+
+/* ══ CARD ══ */
+.card{
+  background:var(--surface);border-radius:16px;
+  box-shadow:var(--shadow);padding:18px;margin-bottom:14px;
+  border:1px solid var(--border);
+}
+.card-title{
+  font-family:'Playfair Display',serif;font-size:16px;color:var(--navy);
+  margin-bottom:12px;display:flex;align-items:center;gap:8px;
+}
+
+/* ══ BUTTONS — narrow, not full width ══ */
+.btn{
+  display:inline-block;padding:11px 24px;border-radius:12px;
+  border:none;cursor:pointer;
+  font-family:'DM Sans',sans-serif;font-size:14px;font-weight:600;
+  transition:all .18s;text-align:center;white-space:nowrap;
+}
+.btn:active{transform:scale(.96)}
+.btn-p{background:var(--teal);color:#fff;box-shadow:0 3px 12px rgba(10,126,164,.28)}
+.btn-p:active{background:#0968a0}
+.btn-o{background:transparent;color:var(--teal);border:2px solid var(--teal)}
+.btn-g{background:var(--teal-dim);color:var(--teal)}
+.btn-d{background:var(--red);color:#fff}
+.btn-s{background:var(--green);color:#fff}
+.btn-w{background:var(--warn);color:#fff}
+.btn-sm{padding:8px 16px;font-size:12px;border-radius:9px}
+.btn-row{display:flex;gap:10px;flex-wrap:wrap}
+.fc{display:inline-flex;align-items:center;justify-content:center;gap:7px}
+.btn-block{display:flex;width:100%}
+
+/* ══ INPUTS ══ */
+.ig{margin-bottom:12px}
+.ig label{display:block;font-size:11px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.8px;margin-bottom:5px}
+input[type=text],input[type=password],textarea,select{
+  width:100%;padding:11px 14px;border:1.5px solid var(--border);
+  border-radius:11px;font-family:'DM Sans',sans-serif;font-size:14px;
+  color:var(--text);background:var(--surface2);outline:none;
+  transition:border-color .2s,background .2s;-webkit-appearance:none;appearance:none;
+}
+input[type=text]:focus,input[type=password]:focus,textarea:focus,select:focus{
+  border-color:var(--teal);background:var(--surface);
+}
+textarea{min-height:80px;resize:none}
+select{
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath fill='%235a7a8a' d='M6 8L0 0h12z'/%3E%3C/svg%3E");
+  background-repeat:no-repeat;background-position:right 13px center;padding-right:34px;
+}
+
+/* ══ KW HINT ══ */
+.kw-hint{background:#fff8e1;border:1px solid #ffe082;border-radius:9px;padding:9px 12px;font-size:11px;color:#7a5800;margin-top:7px;line-height:1.5}
+.kw-hint code{background:rgba(0,0,0,.07);border-radius:3px;padding:1px 4px}
+[data-theme=dark] .kw-hint{background:#2a2000;border-color:#5a4000;color:#e0c060}
+
+/* ══ HOME LAYOUT ══ */
+.home-layout{display:flex;gap:14px;align-items:flex-start;margin-bottom:18px;position:relative}
+
+/* Doctor note — handwriting top right */
+.doctor-note{
+  position:absolute;top:-2px;right:0;
+  font-family:'Source Serif 4',serif;
+  font-style:italic;font-weight:300;
+  font-size:13px;color:var(--muted2);
+  text-align:right;line-height:1.5;
+  transform:rotate(-2deg);
+  max-width:160px;
+  pointer-events:none;
+  opacity:.75;
+}
+[data-theme=dark] .doctor-note{color:var(--muted)}
+
+/* Mascot */
+.mascot-wrap{
+  flex-shrink:0;display:flex;flex-direction:column;align-items:center;gap:6px;
+  width:90px;
+}
+.mascot-bubble{
+  background:var(--surface);border:1.5px solid var(--border);
+  border-radius:12px;padding:7px 9px;font-size:11px;
+  color:var(--text);line-height:1.4;text-align:center;
+  box-shadow:var(--shadow);position:relative;min-height:36px;
+  font-family:'DM Sans',sans-serif;
+}
+.mascot-bubble::after{
+  content:'';position:absolute;bottom:-8px;left:50%;transform:translateX(-50%);
+  border:5px solid transparent;border-top-color:var(--border);
+}
+.mascot-bubble::before{
+  content:'';position:absolute;bottom:-6px;left:50%;transform:translateX(-50%);
+  border:4px solid transparent;border-top-color:var(--surface);
+  z-index:1;
+}
+.mascot-svg{width:80px;height:80px}
+
+/* Stats */
+.stats{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:16px}
+.stat{background:var(--surface);border-radius:12px;padding:12px 8px;text-align:center;box-shadow:var(--shadow);border:1px solid var(--border)}
+.stat-n{font-size:22px;font-weight:700;color:var(--teal)}
+.stat-l{font-size:10px;color:var(--muted);margin-top:1px}
+
+/* Menu buttons — narrow */
+.menu-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px}
+.mb2{
+  background:var(--surface);border:1.5px solid var(--border);border-radius:14px;
+  padding:15px 12px;display:flex;flex-direction:column;align-items:center;gap:8px;
+  cursor:pointer;box-shadow:var(--shadow);transition:all .18s;
+  font-family:'DM Sans',sans-serif;
+}
+.mb2:active{transform:scale(.96);background:var(--teal-dim)}
+.mb2-ico{width:40px;height:40px;border-radius:12px;display:flex;align-items:center;justify-content:center}
+.mb2-ico svg{width:20px;height:20px}
+.mb2-title{font-weight:600;font-size:13px;color:var(--navy);text-align:center}
+.mb2-sub{font-size:10px;color:var(--muted);text-align:center;line-height:1.3}
+[data-theme=dark] .mb2-title{color:var(--text)}
+
+/* ══ FLASHCARD ══ */
+.prog-bar{height:5px;background:var(--border);border-radius:3px;margin-bottom:16px;overflow:hidden}
+.prog-fill{height:100%;background:var(--teal);border-radius:3px;transition:width .4s ease}
+.qctr{text-align:center;font-size:12px;color:var(--muted);margin-bottom:3px}
+.flash{
+  background:var(--surface);border-radius:20px;padding:24px 20px;
+  box-shadow:var(--shadow2);border:1.5px solid var(--border);
+  margin-bottom:16px;min-height:140px;position:relative;overflow:hidden;
+}
+.flash::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,var(--teal),var(--teal-l))}
+.flash-lbl{font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:1.2px;color:var(--teal);margin-bottom:10px}
+.flash-q{font-family:'Playfair Display',serif;font-size:19px;color:var(--navy);line-height:1.4}
+[data-theme=dark] .flash-q{color:var(--text)}
+.flash-a{margin-top:14px;padding-top:14px;border-top:1.5px dashed var(--border);font-size:14px;color:var(--teal);font-weight:500;line-height:1.5;display:none}
+.kw-tag{background:#e3f2fd;color:var(--teal);border-radius:4px;padding:1px 5px;font-weight:700;font-size:13px}
+[data-theme=dark] .kw-tag{background:rgba(56,178,216,.15)}
+
+/* Voice btn */
+.vbtn{
+  width:auto;padding:14px 28px;border-radius:14px;border:none;
+  background:linear-gradient(135deg,var(--teal),var(--teal-l));
+  color:#fff;font-size:14px;font-weight:600;font-family:'DM Sans',sans-serif;
+  cursor:pointer;display:inline-flex;align-items:center;justify-content:center;gap:9px;
+  box-shadow:0 4px 16px rgba(10,126,164,.3);transition:all .18s;
+  margin-bottom:11px;
+}
+.vbtn:active{transform:scale(.96)}
+.vbtn.on{background:linear-gradient(135deg,#c0392b,#e74c3c);animation:vp 1.2s infinite}
+.vbtn svg{width:20px;height:20px;stroke:#fff;fill:none;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round}
+@keyframes vp{0%,100%{box-shadow:0 4px 16px rgba(192,57,43,.35)}50%{box-shadow:0 4px 28px rgba(192,57,43,.6)}}
+
+.vhint{background:var(--teal-dim);border:1px solid var(--border);border-radius:9px;padding:8px 13px;font-size:11px;color:var(--muted);text-align:center;margin-bottom:11px;display:none;line-height:1.4}
+.vhint.on{display:block}
+
+/* Feedback */
+.fb{border-radius:12px;padding:12px 15px;margin-bottom:11px;font-weight:600;font-size:13px;display:none}
+.fb.ok{background:#e8f5e9;color:var(--green);border:1.5px solid #a5d6a7}
+.fb.ng{background:#fdecea;color:var(--red);border:1.5px solid #ef9a9a}
+.fb.pt{background:#fff8e1;color:var(--warn);border:1.5px solid #ffe082}
+[data-theme=dark] .fb.ok{background:rgba(0,121,107,.15);border-color:rgba(38,166,154,.3)}
+[data-theme=dark] .fb.ng{background:rgba(192,57,43,.15);border-color:rgba(231,76,60,.3)}
+[data-theme=dark] .fb.pt{background:rgba(230,126,34,.12);border-color:rgba(243,156,18,.3)}
+
+/* Result breakdown */
+.rbd{border-radius:12px;border:1.5px solid var(--border);background:var(--surface);overflow:hidden;margin-bottom:11px;display:none}
+.rbd.on{display:block}
+.rbd-stitle{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.9px;padding:9px 13px 5px;color:var(--muted)}
+.rbd-list{padding:2px 13px 11px;display:flex;flex-wrap:wrap;gap:6px}
+.rbd-kw{display:inline-flex;align-items:center;gap:4px;padding:4px 10px;border-radius:18px;font-size:12px;font-weight:600}
+.rbd-kw.hit{background:#e8f5e9;color:var(--green);border:1.5px solid #a5d6a7}
+.rbd-kw.mis{background:#fdecea;color:var(--red);border:1.5px solid #ef9a9a}
+.rbd-kw svg{width:11px;height:11px;stroke:currentColor;fill:none;stroke-width:2.5;stroke-linecap:round;stroke-linejoin:round}
+[data-theme=dark] .rbd-kw.hit{background:rgba(0,121,107,.15);border-color:rgba(38,166,154,.3);color:#26a69a}
+[data-theme=dark] .rbd-kw.mis{background:rgba(192,57,43,.15);border-color:rgba(231,76,60,.3);color:#e74c3c}
+.rbd-div{height:1px;background:var(--border);margin:0 13px}
+.rbd-spoken{padding:9px 13px 11px;font-size:12px;color:var(--muted);line-height:1.5}
+.rbd-slbl{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.9px;color:var(--muted);display:block;margin-bottom:2px}
+
+/* Summary */
+.sum-circ{width:120px;height:120px;border-radius:50%;background:conic-gradient(var(--teal) 0deg,var(--teal) var(--pct,0deg),var(--border) var(--pct,0deg));display:flex;align-items:center;justify-content:center;margin:0 auto 18px;box-shadow:0 4px 18px rgba(10,126,164,.18)}
+.sum-in{width:92px;height:92px;background:var(--surface);border-radius:50%;display:flex;flex-direction:column;align-items:center;justify-content:center}
+.sum-pct{font-size:26px;font-weight:700;color:var(--teal)}
+.sum-lbl{font-size:10px;color:var(--muted)}
+
+/* Set list */
+.set-item{display:flex;align-items:center;background:var(--surface);border-radius:12px;padding:12px 14px;margin-bottom:9px;box-shadow:var(--shadow);border:1px solid var(--border)}
+.si-info{flex:1}
+.si-name{font-weight:600;font-size:14px}
+.si-cnt{font-size:11px;color:var(--muted);margin-top:1px}
+.si-del{background:none;border:none;cursor:pointer;padding:5px;display:flex}
+.si-del svg{width:18px;height:18px;stroke:var(--muted);fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+
+/* Setup */
+.ci{display:flex;align-items:center;gap:11px;background:var(--surface);border-radius:12px;padding:12px 14px;margin-bottom:9px;box-shadow:var(--shadow);border:1.5px solid var(--border);cursor:pointer;transition:border-color .18s}
+.ci.sel{border-color:var(--teal);background:var(--teal-dim)}
+.ci-box{width:22px;height:22px;border-radius:6px;border:2px solid var(--border);flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:13px;transition:all .18s}
+.ci.sel .ci-box{background:var(--teal);border-color:var(--teal);color:#fff}
+.ci-name{font-weight:600;font-size:14px}
+.ci-cnt{font-size:11px;color:var(--muted)}
+.mode-row{display:flex;gap:9px;margin-bottom:18px}
+.mo{flex:1;background:var(--surface);border:2px solid var(--border);border-radius:12px;padding:13px 8px;text-align:center;cursor:pointer;transition:all .18s}
+.mo.sel{border-color:var(--teal);background:var(--teal-dim)}
+.mo-ico{font-size:22px;margin-bottom:5px}
+.mo-name{font-size:12px;font-weight:600;color:var(--navy)}
+.mo-desc{font-size:10px;color:var(--muted);margin-top:1px}
+[data-theme=dark] .mo-name{color:var(--text)}
+.sec-title{font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:10px;margin-top:2px}
+
+/* Empty */
+.empty{text-align:center;padding:36px 16px;color:var(--muted)}
+.empty-ico{font-size:42px;margin-bottom:10px}
+
+/* Toast */
+.toast{position:fixed;bottom:75px;left:50%;transform:translateX(-50%);background:var(--navy);color:#fff;padding:9px 20px;border-radius:28px;font-size:13px;font-weight:500;opacity:0;transition:opacity .3s;pointer-events:none;z-index:999;white-space:nowrap}
+.toast.on{opacity:1}
+
+/* Admin Modal */
+.modal-ov{position:fixed;inset:0;background:rgba(0,0,0,.65);backdrop-filter:blur(4px);z-index:500;display:flex;align-items:center;justify-content:center;padding:20px;animation:fi .2s ease}
+.modal-ov.hidden{display:none}
+.modal-box{background:var(--surface);border-radius:22px;padding:28px 22px 24px;width:100%;max-width:320px;box-shadow:0 20px 60px rgba(0,0,0,.3);text-align:center}
+.modal-ico{width:56px;height:56px;background:linear-gradient(135deg,#0a2540,var(--teal));border-radius:16px;display:flex;align-items:center;justify-content:center;margin:0 auto 16px;box-shadow:0 6px 18px rgba(10,126,164,.28)}
+.modal-title{font-family:'Playfair Display',serif;font-size:19px;color:var(--navy);margin-bottom:5px}
+[data-theme=dark] .modal-title{color:var(--text)}
+.modal-sub{font-size:12px;color:var(--muted);margin-bottom:20px;line-height:1.5}
+.modal-pass{width:100%;padding:13px 15px;border:1.5px solid var(--border);border-radius:11px;font-family:'DM Sans',sans-serif;font-size:16px;color:var(--text);background:var(--surface2);outline:none;margin-bottom:9px;transition:border-color .2s;text-align:center;letter-spacing:3px}
+.modal-pass:focus{border-color:var(--teal);background:var(--surface)}
+.modal-err{font-size:11px;color:var(--red);min-height:16px;margin-bottom:9px;font-weight:600}
+.modal-cancel{background:none;border:none;font-family:'DM Sans',sans-serif;font-size:12px;color:var(--muted);cursor:pointer;margin-top:9px;text-decoration:underline}
+
+/* Footer credit */
+.footer-credit{
+  text-align:center;padding:18px 16px 6px;
+  font-size:11px;color:var(--muted2);
+  font-family:'Source Serif 4',serif;font-style:italic;
+  letter-spacing:.3px;
+}
+.footer-credit strong{font-weight:600;color:var(--muted)}
+
+/* Adm badge */
+.adm-badge{background:rgba(56,178,216,.18);border:1px solid var(--teal-l);border-radius:7px;padding:4px 9px;font-size:10px;color:var(--teal-l);font-weight:600;display:none;align-items:center;gap:4px;cursor:pointer;flex-shrink:0}
+.adm-badge.on{display:flex}
+</style>
+</head>
+<body>
+
+<!-- ═══ HEADER ═══ -->
+<div class="hd">
+  <button class="back-btn" id="backBtn" onclick="goBack()">←</button>
+  <a class="hd-logo" href="#" onclick="showScreen('home');return false">
+    <div class="hd-title">Rentgen Wiedzy</div>
+    <div class="hd-sub" id="hSub">Elektroradiologia</div>
+  </a>
+  <div class="adm-badge" id="admBadge" onclick="adminLogout()" title="Wyloguj admina">
+    <svg viewBox="0 0 24 24" width="11" height="11" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+    Admin
+  </div>
+  <button class="hd-menu-btn" id="menuBtn" onclick="openMenu()" aria-label="Menu">
+    <span></span><span></span><span></span>
+  </button>
+</div>
+
+<!-- ═══ DROPDOWN MENU ═══ -->
+<div class="dropdown" id="dropdown">
+  <div class="dropdown-overlay" onclick="closeMenu()"></div>
+  <div class="dropdown-panel">
+    <div class="dp-header">
+      <span>Rentgen Wiedzy</span>
+      <button class="dp-close" onclick="closeMenu()">×</button>
+    </div>
+
+    <div class="dp-section">Zestawy tematyczne</div>
+
+    <button class="dp-item" onclick="goModule('rtg')">
+      <svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M9 8h6M12 8v8M9 12h6"/></svg>
+      RTG
+    </button>
+    <button class="dp-item" onclick="goModule('mr')">
+      <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 3v9l4 4"/></svg>
+      MR – Rezonans magnetyczny
+    </button>
+    <button class="dp-item" onclick="goModule('ct')">
+      <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M8 12h8M12 8v8"/></svg>
+      CT – Tomografia
+    </button>
+    <button class="dp-item" onclick="goModule('spirometria')">
+      <svg viewBox="0 0 24 24"><path d="M3 12h4l3-7 4 14 3-7h4"/></svg>
+      Spirometria
+    </button>
+    <button class="dp-item" onclick="goModule('ekg')">
+      <svg viewBox="0 0 24 24"><polyline points="2 12 6 12 8 4 11 20 14 10 17 14 20 12 22 12"/></svg>
+      EKG
+    </button>
+    <button class="dp-item" onclick="goModule('usg')">
+      <svg viewBox="0 0 24 24"><path d="M12 2C8 2 4 6 4 12s4 10 8 10 8-4 8-10S16 2 12 2"/><path d="M8 12c0-2.2 1.8-4 4-4s4 1.8 4 4"/></svg>
+      USG
+    </button>
+    <button class="dp-item" onclick="goModule('audiometria')">
+      <svg viewBox="0 0 24 24"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg>
+      Audiometria
+    </button>
+
+    <div class="dp-divider"></div>
+    <div class="dp-section">Ustawienia</div>
+
+    <button class="dp-theme" onclick="toggleTheme()">
+      <svg id="themeIco" viewBox="0 0 24 24"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
+      <span id="themeLabel">Tryb nocny</span>
+    </button>
+
+    <div class="dp-footer">
+      Rentgen Wiedzy v2.0<br>
+      Fiszki do nauki elektroradiologii
+    </div>
+  </div>
+</div>
+
+<!-- ═══ ADMIN MODAL ═══ -->
+<div class="modal-ov hidden" id="admModal">
+  <div class="modal-box">
+    <div class="modal-ico">
+      <svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="26" height="26">
+        <rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+      </svg>
+    </div>
+    <div class="modal-title">Dostęp administratora</div>
+    <div class="modal-sub">Tylko uprawnione osoby mogą dodawać i edytować fiszki.</div>
+    <input class="modal-pass" type="password" id="admPass" placeholder="••••••••"
+           onkeydown="if(event.key==='Enter')tryLogin()">
+    <div class="modal-err" id="admErr"></div>
+    <button class="btn btn-p btn-block fc" onclick="tryLogin()">Zaloguj się</button>
+    <br><button class="modal-cancel" onclick="closeModal()">Anuluj</button>
+  </div>
+</div>
+
+<!-- ═══ HOME ═══ -->
+<div class="sc active" id="sc-home">
+
+  <div class="home-layout">
+    <!-- Mascot left -->
+    <div class="mascot-wrap">
+      <div class="mascot-bubble" id="mascotBubble">Cześć!</div>
+      <svg class="mascot-svg" id="mascotSvg" viewBox="0 0 80 100" xmlns="http://www.w3.org/2000/svg">
+        <!-- Lab coat body -->
+        <ellipse cx="40" cy="72" rx="22" ry="28" fill="white" stroke="#b2dced" stroke-width="1.5"/>
+        <path d="M30 52 Q40 58 50 52" fill="none" stroke="#0a7ea4" stroke-width="1.5"/>
+        <!-- Head -->
+        <circle cx="40" cy="36" r="16" fill="#fdd9b5" stroke="#e0aa88" stroke-width="1.5"/>
+        <!-- Hair -->
+        <path d="M24 37 Q25 20 40 19 Q55 20 56 37" fill="#5c3d2e"/>
+        <!-- Eyes -->
+        <ellipse id="mEyeL" cx="35" cy="37" rx="2.5" ry="2.5" fill="#1a1a1a"/>
+        <ellipse id="mEyeR" cx="45" cy="37" rx="2.5" ry="2.5" fill="#1a1a1a"/>
+        <!-- Mouth -->
+        <path id="mMouth" d="M35 44 Q40 47 45 44" fill="none" stroke="#8a6050" stroke-width="1.8" stroke-linecap="round"/>
+        <!-- Sweat drop (hidden by default) -->
+        <path id="mSweat" d="M57 28 Q59 25 61 28 Q59 32 57 28Z" fill="#90cce8" opacity="0"/>
+        <!-- Stethoscope -->
+        <path d="M32 57 Q28 65 30 72 Q32 76 36 74" fill="none" stroke="#5a5a5a" stroke-width="1.5" stroke-linecap="round"/>
+        <circle cx="36" cy="74" r="3" fill="none" stroke="#5a5a5a" stroke-width="1.5"/>
+      </svg>
+    </div>
+
+    <!-- Right side: doctor note + stats placeholder -->
+    <div style="flex:1;padding-top:4px">
+      <div class="doctor-note">dla kolegi<br>i koleżanek<br>z roku</div>
+      <div style="height:60px"></div>
+    </div>
+  </div>
+
+  <!-- Stats -->
+  <div class="stats">
+    <div class="stat"><div class="stat-n" id="stSets">0</div><div class="stat-l">Zestawy</div></div>
+    <div class="stat"><div class="stat-n" id="stCards">0</div><div class="stat-l">Fiszki</div></div>
+    <div class="stat"><div class="stat-n" id="stDone">0</div><div class="stat-l">Sprawdzone</div></div>
+  </div>
+
+  <!-- Menu grid — narrow buttons 2-column -->
+  <div class="menu-grid">
+    <button class="mb2" onclick="goAdd()">
+      <div class="mb2-ico" style="background:#e0f7fa">
+        <svg viewBox="0 0 24 24" fill="none" stroke="#0a7ea4" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/>
+        </svg>
+      </div>
+      <div class="mb2-title">Dodaj fiszkę</div>
+      <div class="mb2-sub">tylko admin</div>
+    </button>
+
+    <button class="mb2" onclick="showScreen('sets')">
+      <div class="mb2-ico" style="background:#e8f5e9">
+        <svg viewBox="0 0 24 24" fill="none" stroke="#00796b" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/>
+        </svg>
+      </div>
+      <div class="mb2-title">Zestawy</div>
+      <div class="mb2-sub">przeglądaj</div>
+    </button>
+
+    <button class="mb2" onclick="showScreen('setup')" style="border-color:var(--teal);grid-column:span 2">
+      <div class="mb2-ico" style="background:#e3f2fd">
+        <svg viewBox="0 0 24 24" fill="none" stroke="#0a7ea4" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+          <polygon points="5 3 19 12 5 21 5 3"/>
+        </svg>
+      </div>
+      <div class="mb2-title" style="color:var(--teal)">Rozpocznij sprawdzian</div>
+      <div class="mb2-sub">głosowe odpowiedzi + ocena</div>
+    </button>
+  </div>
+
+  <div class="footer-credit">
+    <strong>Paweł Olszak</strong> · Polon Sound
+  </div>
+</div>
+
+<!-- ═══ ADD ═══ -->
+<div class="sc" id="sc-add">
+  <div class="card">
+    <div class="card-title">
+      <svg viewBox="0 0 24 24" fill="none" stroke="var(--teal)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="17" height="17">
+        <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/>
+      </svg>Zestaw
+    </div>
+    <div class="ig">
+      <label>Wybierz istniejący</label>
+      <select id="selSet"><option value="">-- brak zestawów --</option></select>
+    </div>
+    <div style="text-align:center;color:var(--muted);font-size:12px;margin:7px 0">— lub utwórz nowy —</div>
+    <div style="display:flex;gap:8px">
+      <input type="text" id="newSetName" placeholder="Nazwa nowego zestawu" style="flex:1">
+      <button class="btn btn-g btn-sm" onclick="createSet()" style="white-space:nowrap">Utwórz</button>
+    </div>
+  </div>
+  <div class="card">
+    <div class="card-title">
+      <svg viewBox="0 0 24 24" fill="none" stroke="var(--teal)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="17" height="17">
+        <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
+        <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
+      </svg>Nowa fiszka
+    </div>
+    <div class="ig">
+      <label>Pytanie</label>
+      <textarea id="inpQ" placeholder="np. Wymień kości kończyny górnej"></textarea>
+    </div>
+    <div class="ig">
+      <label>Odpowiedź – słowa kluczowe w nawiasach ( )</label>
+      <textarea id="inpA" placeholder="np. kość (ramienna), kość (łokciowa)"></textarea>
+      <div class="kw-hint">
+        💡 Słowo kluczowe w <code>()</code> — np. <em>kość (ramienna)</em><br>
+        Bez nawiasów – oceniane są wszystkie słowa &gt; 2 znaki.
+      </div>
+    </div>
+    <button class="btn btn-p fc" onclick="saveCard()">
+      <svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" width="16" height="16">
+        <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/>
+        <polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/>
+      </svg>Zapisz fiszkę
+    </button>
+  </div>
+</div>
+
+<!-- ═══ SETS ═══ -->
+<div class="sc" id="sc-sets"><div id="setsList"></div></div>
+
+<!-- ═══ SETUP ═══ -->
+<div class="sc" id="sc-setup">
+  <div class="card">
+    <div class="card-title">
+      <svg viewBox="0 0 24 24" fill="none" stroke="var(--teal)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="17" height="17">
+        <polyline points="9 11 12 14 22 4"/>
+        <path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/>
+      </svg>Wybierz zestawy
+    </div>
+    <div id="setupList"></div>
+  </div>
+  <div class="sec-title">Tryb sprawdzianu</div>
+  <div class="mode-row">
+    <div class="mo sel" id="mRnd" onclick="selMode('random')">
+      <div class="mo-ico">🔀</div><div class="mo-name">Losowo</div><div class="mo-desc">Wszystkie fiszki</div>
+    </div>
+    <div class="mo" id="mUnk" onclick="selMode('unasked')">
+      <div class="mo-ico">📚</div><div class="mo-name">Powtórka</div><div class="mo-desc">Nieznane najpierw</div>
+    </div>
+  </div>
+  <button class="btn btn-p fc" style="padding:15px 32px" onclick="startQuiz()">
+    <svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" width="16" height="16"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+    Rozpocznij sprawdzian
+  </button>
+</div>
+
+<!-- ═══ QUIZ ═══ -->
+<div class="sc" id="sc-quiz">
+  <div class="qctr" id="qCtr">1 / 1</div>
+  <div class="prog-bar"><div class="prog-fill" id="progFill" style="width:0%"></div></div>
+
+  <div class="flash">
+    <div class="flash-lbl">PYTANIE</div>
+    <div class="flash-q" id="qQ">—</div>
+    <div class="flash-a" id="qA"></div>
+  </div>
+
+  <div class="rbd" id="rbd">
+    <div class="rbd-stitle">✅ Trafione słowa kluczowe</div>
+    <div class="rbd-list" id="rbdHits"></div>
+    <div class="rbd-div"></div>
+    <div class="rbd-stitle">❌ Pominięte słowa kluczowe</div>
+    <div class="rbd-list" id="rbdMiss"></div>
+    <div class="rbd-div"></div>
+    <div class="rbd-spoken">
+      <span class="rbd-slbl">Twoja wypowiedź</span>
+      <span id="rbdTxt" style="font-style:italic"></span>
+    </div>
+  </div>
+
+  <div class="fb" id="fb"></div>
+  <div class="vhint" id="vhint">🎤 Słucham… Powiedz <strong>"koniec odpowiedzi"</strong> gdy skończysz.</div>
+
+  <div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:11px">
+    <button class="vbtn" id="vBtn" onclick="startVoice()">
+      <svg id="vIco" viewBox="0 0 24 24">
+        <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/>
+        <path d="M19 10v2a7 7 0 0 1-14 0v-2"/>
+        <line x1="12" y1="19" x2="12" y2="23"/>
+        <line x1="8" y1="23" x2="16" y2="23"/>
+      </svg>
+      <span id="vLbl">Odpowiedz głosowo</span>
+    </button>
+    <button class="btn btn-g fc" id="btnShow" onclick="revealAnswer()">
+      <svg viewBox="0 0 24 24" fill="none" stroke="var(--teal)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="16" height="16">
+        <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/>
+      </svg>Pokaż
+    </button>
+  </div>
+
+  <div class="btn-row" id="manBtns" style="display:none;margin-bottom:11px">
+    <button class="btn btn-d fc" onclick="markManual(false)">
+      <svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round" width="14" height="14">
+        <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+      </svg>Zła
+    </button>
+    <button class="btn btn-s fc" onclick="markManual(true)">
+      <svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" width="14" height="14">
+        <polyline points="20 6 9 17 4 12"/>
+      </svg>Dobra
+    </button>
+  </div>
+
+  <button class="btn btn-p" id="btnNext" style="display:none" onclick="nextCard()">Następna →</button>
+</div>
+
+<!-- ═══ SUMMARY ═══ -->
+<div class="sc" id="sc-summary">
+  <div style="text-align:center;padding:18px 0 26px">
+    <div style="font-family:'Playfair Display',serif;font-size:21px;color:var(--navy);margin-bottom:20px">Sprawdzian zakończony! 🎉</div>
+    <div class="sum-circ" id="sumCirc">
+      <div class="sum-in">
+        <div class="sum-pct" id="sumPct">—</div>
+        <div class="sum-lbl">wynik</div>
+      </div>
+    </div>
+    <div style="font-size:15px;color:var(--muted);margin-bottom:5px" id="sumScore"></div>
+    <div style="font-size:13px;color:var(--muted)" id="sumMsg"></div>
+  </div>
+  <div style="display:flex;gap:10px;flex-wrap:wrap">
+    <button class="btn btn-p fc" onclick="showScreen('home')">
+      <svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="16" height="16"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+      Menu
+    </button>
+    <button class="btn btn-o fc" onclick="showScreen('setup')">
+      <svg viewBox="0 0 24 24" fill="none" stroke="var(--teal)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="16" height="16"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-.18-4.83"/></svg>
+      Nowy sprawdzian
+    </button>
+  </div>
+</div>
+
+<!-- ═══ BOTTOM NAV ═══ -->
+<nav class="nav">
+  <button class="nb active" id="nb-home" onclick="showScreen('home')">
+    <svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+    <span>Menu</span>
+  </button>
+  <button class="nb" id="nb-add" onclick="goAdd()">
+    <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></svg>
+    <span>Dodaj</span>
+  </button>
+  <button class="nb" id="nb-sets" onclick="showScreen('sets')">
+    <svg viewBox="0 0 24 24"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>
+    <span>Zestawy</span>
+  </button>
+  <button class="nb" id="nb-setup" onclick="showScreen('setup')">
+    <svg viewBox="0 0 24 24"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+    <span>Sprawdzian</span>
+  </button>
+</nav>
+
+<div class="toast" id="toast"></div>
+
+<script>
+// ════════════════════════════════════
+// ADMIN  ⚠️ ZMIEŃ HASŁO przed wgraniem!
+// ════════════════════════════════════
+const ADMIN_PW  = 'Rentgen2025!';
+const ADMIN_KEY = 'rw_admin';
+const isAdmin = function(){ return sessionStorage.getItem(ADMIN_KEY) === '1'; };
+
+function goAdd(){ requireAdmin(function(){ showScreen('add'); }); }
+
+function refreshBadge(){
+  document.getElementById('admBadge').classList.toggle('on', isAdmin());
+}
+
+function requireAdmin(cb){
+  if(isAdmin()){ cb(); return; }
+  window._cb = cb;
+  document.getElementById('admPass').value = '';
+  document.getElementById('admErr').textContent = '';
+  document.getElementById('admModal').classList.remove('hidden');
+  setTimeout(function(){ document.getElementById('admPass').focus(); }, 120);
+}
+
+function tryLogin(){
+  if(document.getElementById('admPass').value === ADMIN_PW){
+    sessionStorage.setItem(ADMIN_KEY,'1');
+    document.getElementById('admModal').classList.add('hidden');
+    refreshBadge();
+    toast('Zalogowano jako administrator');
+    if(window._cb){ window._cb(); window._cb = null; }
+  } else {
+    document.getElementById('admErr').textContent = 'Nieprawidlowe haslo. Sprobuj ponownie.';
+    document.getElementById('admPass').value = '';
+    document.getElementById('admPass').focus();
   }
 }
-```
 
-Kliknij **Opublikuj**. Bez tego fiszki nie będą się zapisywać.
+function closeModal(){
+  document.getElementById('admModal').classList.add('hidden');
+  window._cb = null;
+}
 
----
+function adminLogout(){
+  if(!confirm('Wylogowac sie z konta administratora?')) return;
+  sessionStorage.removeItem(ADMIN_KEY);
+  refreshBadge();
+  toast('Wylogowano');
+  if(cur === 'add') showScreen('home');
+}
 
-**Co teraz działa:**
+// ════════════════════════════════════
+// THEME
+// ════════════════════════════════════
+function toggleTheme(){
+  var isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+  var next = isDark ? 'light' : 'dark';
+  document.documentElement.setAttribute('data-theme', next);
+  localStorage.setItem('rw_theme', next);
+  updateThemeUI();
+}
 
-- ✅ Fiszki i zestawy zapisują się w **Firebase Firestore** — dostępne dla wszystkich użytkowników na każdym urządzeniu
-- ✅ Pasek synchronizacji u góry strony głównej — zielona kropka gdy połączone
-- ✅ Każda operacja (dodaj/edytuj/usuń) trafia do chmury w czasie rzeczywistym
-- ✅ Wyniki sprawdzianów (asked/correct) też się synchronizują
-- ✅ Przycisk **Wyloguj administratora** w menu bocznym
+function updateThemeUI(){
+  var isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+  document.getElementById('themeLabel').textContent = isDark ? 'Tryb dzienny' : 'Tryb nocny';
+  var ico = document.getElementById('themeIco');
+  if(isDark){
+    ico.innerHTML = '<path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>';
+  } else {
+    ico.innerHTML = '<circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/>';
+  }
+}
 
-Wgraj plik na GitHub i gotowe!
+// ════════════════════════════════════
+// DROPDOWN MENU
+// ════════════════════════════════════
+function openMenu(){
+  document.getElementById('dropdown').classList.add('open');
+}
+function closeMenu(){
+  document.getElementById('dropdown').classList.remove('open');
+}
+function goModule(name){
+  closeMenu();
+  var moduleNames = {
+    rtg:'RTG', mr:'Rezonans magnetyczny', ct:'Tomografia komputerowa',
+    spirometria:'Spirometria', ekg:'EKG', usg:'USG', audiometria:'Audiometria'
+  };
+  toast('Modul: ' + (moduleNames[name]||name));
+  // Pre-filter sets by module name if any match
+  showScreen('setup');
+}
+
+// ════════════════════════════════════
+// MASCOT
+// ════════════════════════════════════
+var JOKES = [
+  'Rentgen bez ochrony? Bardziej ryzykowne niz EKG bez zelowania!',
+  'MRI mowi: "Prosze wyjac biżuterie." Stomatolog mowi: "Prosze wypluć."',
+  'CT vs MRI: jedno liczy piksele, drugie liczy minuty oczekiwania.',
+  'Spirometria: dmuchaj, dmuchaj, DMUCHAJ! Tak samo jak przy urodzinowych swieczkach.',
+  'Audiometria: czy slyszysz piip? Nie? To znaczy ze dziala.',
+  'USG w ciazy: jedyne badanie gdzie pacjent jest podekscytowany wynikiem.',
+  'Elektroradiolog: ninja medycyny – niewidoczny, nieodzowny, nieoceniony.',
+  'Skrzydelka rentgenowskie: nie latamy, ale za to przeswietlamy.',
+  'EKG mowi wiecej o sercu niz Tinder.',
+  'Masz prawidlowy EKG? To znaczy ze masz serce. Dobry start.',
+  'Dawka ALARA: tak mala jak rozum pacjenta, ktory sam demontuje aparat RTG.',
+  'MRI: 45 minut absolutnej ciszy. Dla introwertyków – spa.',
+  'Technik RTG: jedyna osoba, ktora moze powiedziec "prosze sie rozebrac" i nie jest lekarzem.',
+  'Fluoroskopia: real-time horror show dla kiszek.',
+  'Gadolin: bo zwykla woda w MRI jest zbyt nudna.',
+];
+
+var MOTIVATIONAL = [
+  'Jeszcze troche, juz prawie!',
+  'Roentgen tez nie odkryl promieni X za pierwszym razem.',
+  'Brnij dalej – fiszki same sie nie naucza!',
+  'Kazdy ekspert byl kiedys poczatkujacym.',
+  'Powtarzanie to matka uczenia – i babcia egzaminow!',
+];
+
+var GOOD_COMMENTS = [
+  'Nieźle... ale nie bądź zbyt pewny siebie przed egzaminem!',
+  'OK, całkiem sprawnie. Kości kończyny górnej to jednak nie rocket science.',
+  'Hmm, szło dobrze. Ale czy na pewno wiesz jak to wygląda w praktyce?',
+  'Imponujące! Dla elektroradiologa to podstawa, nie powód do świętowania.',
+  'Solidnie. Choć egzaminator pewnie miałby jedno dodatkowe pytanie...',
+];
+
+function updateMascot(){
+  var cards = DB.cards;
+  var asked = cards.filter(function(c){ return c.asked > 0; });
+  var lastVisit = localStorage.getItem('rw_last_visit');
+  var now = Date.now();
+  var bubble = document.getElementById('mascotBubble');
+  var mouth = document.getElementById('mMouth');
+  var eyeL = document.getElementById('mEyeL');
+  var eyeR = document.getElementById('mEyeR');
+  var sweat = document.getElementById('mSweat');
+
+  var msg = '';
+
+  if(!lastVisit || cards.length === 0){
+    // New user
+    msg = 'Czesc! Jestem tu, zeby pomoc Ci zdac. Dodaj pierwsze fiszki!';
+    mouth.setAttribute('d','M35 44 Q40 48 45 44');
+    sweat.setAttribute('opacity','0');
+  } else {
+    var daysSince = (now - parseInt(lastVisit)) / 86400000;
+    if(daysSince > 3){
+      // Long absence – random joke
+      var joke = JOKES[Math.floor(now / 86400000) % JOKES.length];
+      msg = joke;
+      mouth.setAttribute('d','M35 44 Q40 46 45 44');
+      sweat.setAttribute('opacity','0.7');
+    } else if(asked.length === 0){
+      msg = 'Zaczynamy! Czas na pierwsze fiszki.';
+      mouth.setAttribute('d','M35 44 Q40 48 45 44');
+      sweat.setAttribute('opacity','0');
+    } else {
+      var totalOk = asked.reduce(function(s,c){ return s + c.correct; }, 0);
+      var totalAsk = asked.reduce(function(s,c){ return s + c.asked; }, 0);
+      var ratio = totalAsk > 0 ? totalOk / totalAsk : 0;
+      if(ratio < 0.4){
+        msg = MOTIVATIONAL[Math.floor(Math.random() * MOTIVATIONAL.length)];
+        mouth.setAttribute('d','M36 46 Q40 43 44 46');
+        eyeL.setAttribute('ry','1.8');
+        eyeR.setAttribute('ry','1.8');
+        sweat.setAttribute('opacity','1');
+      } else if(ratio >= 0.75){
+        msg = GOOD_COMMENTS[Math.floor(Math.random() * GOOD_COMMENTS.length)];
+        mouth.setAttribute('d','M35 44 Q40 48 45 44');
+        eyeL.setAttribute('ry','2.5');
+        eyeR.setAttribute('ry','2.5');
+        sweat.setAttribute('opacity','0');
+      } else {
+        msg = 'Sredni wynik ' + Math.round(ratio*100) + '% – mozna lepiej! Powtor material.';
+        mouth.setAttribute('d','M35 44 Q40 46 45 44');
+        sweat.setAttribute('opacity','0.4');
+      }
+    }
+  }
+
+  bubble.textContent = msg;
+  localStorage.setItem('rw_last_visit', now.toString());
+}
+
+// ════════════════════════════════════
+// DATA
+// ════════════════════════════════════
+var DB = {
+  get sets()  { return JSON.parse(localStorage.getItem('rw_sets')  || '[]'); },
+  get cards() { return JSON.parse(localStorage.getItem('rw_cards') || '[]'); },
+  saveSets:  function(s){ localStorage.setItem('rw_sets',  JSON.stringify(s)); },
+  saveCards: function(c){ localStorage.setItem('rw_cards', JSON.stringify(c)); },
+  addSet: function(name){
+    var s = this.sets, id = ''+Date.now();
+    s.push({id:id,name:name,created:Date.now()}); this.saveSets(s); return id;
+  },
+  deleteSet: function(id){
+    this.saveSets(this.sets.filter(function(s){ return s.id!==id; }));
+    this.saveCards(this.cards.filter(function(c){ return c.setId!==id; }));
+  },
+  addCard: function(setId,q,a){
+    var c = this.cards;
+    c.push({id:''+Date.now(),setId:setId,question:q,answer:a,asked:0,correct:0});
+    this.saveCards(c);
+  },
+  forSet:  function(id){ return this.cards.filter(function(c){ return c.setId===id; }); },
+  forSets: function(ids){ return this.cards.filter(function(c){ return ids.indexOf(c.setId)>=0; }); },
+  record: function(id,ok){
+    var c = this.cards, x = c.find(function(v){ return v.id===id; });
+    if(x){ x.asked++; if(ok) x.correct++; }
+    this.saveCards(c);
+  }
+};
+
+// ════════════════════════════════════
+// KEYWORDS
+// ════════════════════════════════════
+function keywords(answer){
+  var found = [];
+  var re = /\(([^)]+)\)/g, m;
+  while((m = re.exec(answer)) !== null){
+    m[1].trim().split(/\s+/).forEach(function(w){
+      var c = w.replace(/[.,;:!?]/g,'').trim().toLowerCase();
+      if(c.length > 1) found.push(c);
+    });
+  }
+  if(found.length) return found;
+  return answer.toLowerCase().split(/[\s,;]+/)
+    .map(function(w){ return w.replace(/[.,;:!?()]/g,'').trim(); })
+    .filter(function(w){ return w.length > 2; });
+}
+
+function fmtAnswer(answer){
+  return esc(answer).replace(/\(([^)]+)\)/g, function(_,kw){
+    return '<span class="kw-tag">'+kw+'</span>';
+  });
+}
+
+// ════════════════════════════════════
+// NAVIGATION
+// ════════════════════════════════════
+var cur = 'home';
+var NAV = ['home','add','sets','setup'];
+var SUBS = {
+  home:'Elektroradiologia', add:'Dodaj fiszkę', sets:'Zestawy fiszek',
+  setup:'Wybierz sprawdzian', quiz:'Sprawdzian w toku', summary:'Podsumowanie'
+};
+
+function showScreen(name){
+  if(name === 'add' && !isAdmin()){
+    requireAdmin(function(){ showScreen('add'); });
+    return;
+  }
+  var screens = document.querySelectorAll('.sc');
+  for(var i=0;i<screens.length;i++) screens[i].classList.remove('active');
+  document.getElementById('sc-'+name).classList.add('active');
+
+  var nbs = document.querySelectorAll('.nb');
+  for(var j=0;j<nbs.length;j++) nbs[j].classList.remove('active');
+  var nb = document.getElementById('nb-'+name);
+  if(nb) nb.classList.add('active');
+
+  document.getElementById('hSub').textContent = SUBS[name]||'';
+  document.getElementById('backBtn').style.display = NAV.indexOf(name)>=0 ? 'none' : 'block';
+  cur = name;
+
+  if(name==='home')  renderHome();
+  if(name==='add')   renderAdd();
+  if(name==='sets')  renderSets();
+  if(name==='setup') renderSetup();
+  window.scrollTo(0,0);
+}
+
+function goBack(){ showScreen('home'); }
+
+// ════════════════════════════════════
+// HOME
+// ════════════════════════════════════
+function renderHome(){
+  var cards = DB.cards;
+  document.getElementById('stSets').textContent  = DB.sets.length;
+  document.getElementById('stCards').textContent = cards.length;
+  document.getElementById('stDone').textContent  = cards.filter(function(c){ return c.asked>0; }).length;
+  updateMascot();
+}
+
+// ════════════════════════════════════
+// ADD
+// ════════════════════════════════════
+function renderAdd(){
+  var sel = document.getElementById('selSet'), sets = DB.sets;
+  sel.innerHTML = sets.length
+    ? sets.map(function(s){ return '<option value="'+s.id+'">'+esc(s.name)+'</option>'; }).join('')
+    : '<option value="">-- brak zestawow --</option>';
+}
+
+function createSet(){
+  var n = document.getElementById('newSetName').value.trim();
+  if(!n){ toast('Podaj nazwe zestawu'); return; }
+  DB.addSet(n);
+  document.getElementById('newSetName').value = '';
+  renderAdd();
+  toast('Zestaw "'+n+'" utworzony!');
+}
+
+function saveCard(){
+  var setId = document.getElementById('selSet').value;
+  var q = document.getElementById('inpQ').value.trim();
+  var a = document.getElementById('inpA').value.trim();
+  if(!setId){ toast('Najpierw utworz lub wybierz zestaw'); return; }
+  if(!q||!a){ toast('Uzupelnij pytanie i odpowiedz'); return; }
+  DB.addCard(setId,q,a);
+  document.getElementById('inpQ').value = '';
+  document.getElementById('inpA').value = '';
+  toast('Fiszka zapisana!');
+}
+
+// ════════════════════════════════════
+// SETS
+// ════════════════════════════════════
+function renderSets(){
+  var sets = DB.sets, el = document.getElementById('setsList');
+  if(!sets.length){
+    el.innerHTML = '<div class="empty"><div class="empty-ico">📭</div><div>Brak zestawow. Dodaj pierwsze fiszki!</div></div>';
+    return;
+  }
+  el.innerHTML = sets.map(function(s){
+    var n = DB.forSet(s.id).length;
+    return '<div class="set-item">'
+      +'<div class="si-info"><div class="si-name">'+esc(s.name)+'</div>'
+      +'<div class="si-cnt">'+n+' fiszek</div></div>'
+      +'<button class="si-del" onclick="delSet(\''+s.id+'\',\''+esc(s.name)+'\')" title="Usun">'
+      +'<svg viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/>'
+      +'<path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/>'
+      +'<path d="M10 11v6M14 11v6M9 6V4h6v2"/></svg></button></div>';
+  }).join('');
+}
+
+function delSet(id,name){
+  if(!confirm('Usunac zestaw "'+name+'" i wszystkie jego fiszki?')) return;
+  DB.deleteSet(id); renderSets(); toast('Zestaw usuniety');
+}
+
+// ════════════════════════════════════
+// SETUP
+// ════════════════════════════════════
+var qMode = 'random';
+var selIds = [];
+
+function renderSetup(){
+  var sets = DB.sets, el = document.getElementById('setupList');
+  if(!sets.length){
+    el.innerHTML = '<div class="empty"><div class="empty-ico">📭</div><div>Brak zestawow</div></div>';
+    return;
+  }
+  el.innerHTML = sets.map(function(s){
+    var isSel = selIds.indexOf(s.id) >= 0;
+    return '<div class="ci '+(isSel?'sel':'')+'" onclick="togSet(\''+s.id+'\',this)">'
+      +'<div class="ci-box">'+(isSel?'✓':'')+'</div>'
+      +'<div><div class="ci-name">'+esc(s.name)+'</div>'
+      +'<div class="ci-cnt">'+DB.forSet(s.id).length+' fiszek</div></div></div>';
+  }).join('');
+}
+
+function togSet(id,el){
+  var idx = selIds.indexOf(id);
+  if(idx >= 0) selIds.splice(idx,1); else selIds.push(id);
+  el.classList.toggle('sel');
+  el.querySelector('.ci-box').textContent = selIds.indexOf(id)>=0 ? '✓' : '';
+}
+
+function selMode(m){
+  qMode = m;
+  document.getElementById('mRnd').classList.toggle('sel', m==='random');
+  document.getElementById('mUnk').classList.toggle('sel', m==='unasked');
+}
+
+// ════════════════════════════════════
+// QUIZ
+// ════════════════════════════════════
+var qCards=[], qIdx=0, qOk=0;
+var recog=null, accum='', listening=false;
+
+function startQuiz(){
+  if(!selIds.length){ toast('Wybierz co najmniej jeden zestaw'); return; }
+  var cards = DB.forSets(selIds);
+  if(!cards.length){ toast('Brak fiszek w wybranych zestawach'); return; }
+  if(qMode==='unasked'){
+    var u = cards.filter(function(c){ return c.asked===0; });
+    if(u.length) cards = u;
+  }
+  for(var i=cards.length-1;i>0;i--){
+    var j = Math.floor(Math.random()*(i+1));
+    var tmp = cards[i]; cards[i]=cards[j]; cards[j]=tmp;
+  }
+  qCards=cards; qIdx=0; qOk=0;
+  showScreen('quiz'); drawCard();
+}
+
+function drawCard(){
+  if(qIdx >= qCards.length){ showSummary(); return; }
+  var c = qCards[qIdx];
+  var pct = (qIdx/qCards.length*100).toFixed(0);
+  document.getElementById('qCtr').textContent = (qIdx+1)+' / '+qCards.length;
+  document.getElementById('progFill').style.width = pct+'%';
+  document.getElementById('qQ').textContent = c.question;
+  var qa = document.getElementById('qA');
+  qa.innerHTML = 'Odpowiedz: '+fmtAnswer(c.answer); qa.style.display='none';
+  document.getElementById('rbd').classList.remove('on');
+  document.getElementById('fb').style.display='none';
+  document.getElementById('fb').className='fb';
+  document.getElementById('vhint').classList.remove('on');
+  document.getElementById('manBtns').style.display='none';
+  document.getElementById('btnNext').style.display='none';
+  document.getElementById('btnShow').style.display='inline-flex';
+  document.getElementById('vBtn').style.display='inline-flex';
+  accum=''; listening=false; voiceIdle();
+}
+
+function revealAnswer(){
+  document.getElementById('qA').style.display='block';
+  document.getElementById('manBtns').style.display='flex';
+  document.getElementById('btnShow').style.display='none';
+}
+
+function markManual(ok){
+  DB.record(qCards[qIdx].id, ok);
+  if(ok) qOk++;
+  document.getElementById('manBtns').style.display='none';
+  document.getElementById('vBtn').style.display='none';
+  document.getElementById('btnNext').style.display='block';
+}
+
+function nextCard(){ qIdx++; drawCard(); }
+
+// VOICE
+var STOPS = ['koniec odpowiedzi','koniec odpowiedz','koniec','stop','zakoncz','zakończ'];
+
+function voiceIdle(){
+  document.getElementById('vBtn').classList.remove('on');
+  document.getElementById('vIco').innerHTML =
+    '<path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/>'
+    +'<path d="M19 10v2a7 7 0 0 1-14 0v-2"/>'
+    +'<line x1="12" y1="19" x2="12" y2="23"/>'
+    +'<line x1="8" y1="23" x2="16" y2="23"/>';
+  document.getElementById('vLbl').textContent = 'Odpowiedz głosowo';
+}
+
+function voiceOn(){
+  document.getElementById('vBtn').classList.add('on');
+  document.getElementById('vIco').innerHTML = '<rect x="6" y="6" width="12" height="12" rx="2"/>';
+  document.getElementById('vLbl').textContent = 'Nagrywam... "koniec odpowiedzi"';
+  document.getElementById('vhint').classList.add('on');
+}
+
+function hasStop(t){
+  var l = t.toLowerCase();
+  return STOPS.some(function(p){ return l.indexOf(p)>=0; });
+}
+function stripStop(t){
+  var r = t.toLowerCase();
+  STOPS.forEach(function(p){ r = r.split(p).join(''); });
+  return r.trim();
+}
+
+function startVoice(){
+  var SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+  if(!SR){ toast('Przegladarka nie obsluguje rozpoznawania mowy'); revealAnswer(); return; }
+  if(listening){ if(recog){ try{ recog.stop(); }catch(e){} } return; }
+  accum=''; listening=true;
+
+  function spawn(){
+    if(!listening) return;
+    if(recog){ try{ recog.abort(); }catch(e){} }
+    recog = new SR();
+    recog.lang='pl-PL';
+    recog.interimResults=true;
+    recog.continuous=false;
+    recog.maxAlternatives=1;
+    recog.onstart = function(){ voiceOn(); };
+    recog.onresult = function(e){
+      var interim='', final='';
+      for(var i=e.resultIndex;i<e.results.length;i++){
+        var t = e.results[i][0].transcript;
+        if(e.results[i].isFinal) final+=t+' '; else interim+=t;
+      }
+      if(interim) document.getElementById('vLbl').textContent = '🎤 '+interim;
+      if(final){
+        if(hasStop(final)){
+          accum += stripStop(final)+' ';
+          listening=false;
+          try{ recog.abort(); }catch(e){}
+          finishVoice();
+        } else {
+          accum += final;
+        }
+      }
+    };
+    recog.onerror = function(e){
+      if(e.error==='not-allowed'){
+        listening=false; voiceIdle();
+        document.getElementById('vhint').classList.remove('on');
+        toast('Zezwol na dostep do mikrofonu'); revealAnswer();
+      }
+    };
+    recog.onend = function(){
+      if(listening) setTimeout(spawn,150);
+      else{ voiceIdle(); document.getElementById('vhint').classList.remove('on'); }
+    };
+    recog.start();
+  }
+  spawn();
+}
+
+function finishVoice(){
+  voiceIdle();
+  document.getElementById('vhint').classList.remove('on');
+  var spoken = accum.trim();
+  if(!spoken){ toast('Nie wykryto odpowiedzi – sprobuj ponownie'); return; }
+  evaluate(spoken);
+}
+
+function evaluate(spoken){
+  var card = qCards[qIdx];
+  var low = spoken.toLowerCase();
+  document.getElementById('qA').innerHTML = 'Odpowiedz: '+fmtAnswer(card.answer);
+  document.getElementById('qA').style.display='block';
+  document.getElementById('btnShow').style.display='none';
+  document.getElementById('vBtn').style.display='none';
+
+  var kws = keywords(card.answer);
+  var hits = kws.filter(function(k){ return low.indexOf(k)>=0; });
+  var miss = kws.filter(function(k){ return low.indexOf(k)<0; });
+  var score = kws.length ? hits.length/kws.length : 0;
+
+  var hitH = hits.length
+    ? hits.map(function(k){
+        return '<span class="rbd-kw hit"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>'+esc(k)+'</span>';
+      }).join('')
+    : '<span style="font-size:12px;color:var(--muted);padding-left:2px">brak trafionych</span>';
+
+  var misH = miss.length
+    ? miss.map(function(k){
+        return '<span class="rbd-kw mis"><svg viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>'+esc(k)+'</span>';
+      }).join('')
+    : '<span style="font-size:12px;color:var(--green);padding-left:2px">wszystkie trafione!</span>';
+
+  document.getElementById('rbdHits').innerHTML = hitH;
+  document.getElementById('rbdMiss').innerHTML = misH;
+  document.getElementById('rbdTxt').textContent = '"'+spoken+'"';
+  document.getElementById('rbd').classList.add('on');
+
+  var cls, msg, ok;
+  if(score>=0.75){ cls='ok'; ok=true;  msg='Swietnie! '+hits.length+'/'+kws.length+' slow kluczowych ('+Math.round(score*100)+'%)'; }
+  else if(score>=0.4){ cls='pt'; ok=null; msg='Czesciowo – '+hits.length+'/'+kws.length+' slow kluczowych. Ocen sam:'; }
+  else { cls='ng'; ok=false; msg='Za malo – '+hits.length+'/'+kws.length+' slow kluczowych ('+Math.round(score*100)+'%)'; }
+
+  var fb = document.getElementById('fb');
+  fb.className='fb '+cls; fb.textContent=msg; fb.style.display='block';
+
+  if(ok===true){  DB.record(card.id,true);  qOk++; document.getElementById('btnNext').style.display='block'; }
+  else if(ok===false){ DB.record(card.id,false); document.getElementById('btnNext').style.display='block'; }
+  else { document.getElementById('manBtns').style.display='flex'; }
+}
+
+// ════════════════════════════════════
+// SUMMARY
+// ════════════════════════════════════
+function showSummary(){
+  var total=qCards.length, pct=total?Math.round(qOk/total*100):0;
+  document.getElementById('sumPct').textContent = pct+'%';
+  document.getElementById('sumScore').textContent = qOk+' z '+total+' poprawnych';
+  var msgs=['Cwicz dalej! Nie poddawaj sie!','Niezly wynik! Mozna lepiej.','Bardzo dobrze! Jestes na dobrej drodze.','Doskonale! Egzaminator bedzie pod wrazeniem.'];
+  document.getElementById('sumMsg').textContent = msgs[Math.min(3,Math.floor(pct/25))];
+  document.getElementById('sumCirc').style.setProperty('--pct',(pct*3.6)+'deg');
+  showScreen('summary');
+}
+
+// ════════════════════════════════════
+// UTILS
+// ════════════════════════════════════
+function toast(msg){
+  var t=document.getElementById('toast');
+  t.textContent=msg; t.classList.add('on');
+  setTimeout(function(){ t.classList.remove('on'); }, 2600);
+}
+
+function esc(s){
+  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+// ════════════════════════════════════
+// INIT
+// ════════════════════════════════════
+(function(){
+  var saved = localStorage.getItem('rw_theme') || 'light';
+  document.documentElement.setAttribute('data-theme', saved);
+  updateThemeUI();
+  refreshBadge();
+  renderHome();
+})();
+</script>
+</body>
+</html>

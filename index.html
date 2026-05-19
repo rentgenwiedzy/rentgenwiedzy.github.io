@@ -1,0 +1,35 @@
+Świetnie! Wstawiam Twoją konfigurację i finalizuję plik.
+
+Gotowe! Wszystko sprawdzone. Teraz jeden ważny krok po Twojej stronie:
+
+---
+
+**⚠️ Musisz otworzyć reguły Firestore na zapis**
+
+W Firebase Console wejdź w **Firestore Database → Reguły** i wklej to:
+
+```
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    match /{document=**} {
+      allow read: if true;
+      allow write: if true;
+    }
+  }
+}
+```
+
+Kliknij **Opublikuj**. Bez tego fiszki nie będą się zapisywać.
+
+---
+
+**Co teraz działa:**
+
+- ✅ Fiszki i zestawy zapisują się w **Firebase Firestore** — dostępne dla wszystkich użytkowników na każdym urządzeniu
+- ✅ Pasek synchronizacji u góry strony głównej — zielona kropka gdy połączone
+- ✅ Każda operacja (dodaj/edytuj/usuń) trafia do chmury w czasie rzeczywistym
+- ✅ Wyniki sprawdzianów (asked/correct) też się synchronizują
+- ✅ Przycisk **Wyloguj administratora** w menu bocznym
+
+Wgraj plik na GitHub i gotowe!
